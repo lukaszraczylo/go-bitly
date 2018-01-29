@@ -111,10 +111,11 @@ func (client *Links) Shorten(longURL string) (link Link, err error) {
 	return
 }
 
-func (client *Links) Clicks(shortURL string, unit string) (link Link, err error) {
+func (client *Links) Clicks(shortURL string, unit string, units string) (link Link, err error) {
 	req, err := client.get("/link/clicks", url.Values{
-		"link": []string{shortURL},
-		"unit": []string{unit},
+		"link":  []string{shortURL},
+		"unit":  []string{unit},
+		"units": []string{units},
 	})
 	if err != nil {
 		return
@@ -122,4 +123,15 @@ func (client *Links) Clicks(shortURL string, unit string) (link Link, err error)
 
 	err = json.Unmarshal(req.Data, &link)
 	return
+}
+
+func (client *Links) Popular(unit string, units string) (links []Link, err error) {
+	req, err := client.req("/user/popular_links", url.Values{
+		"unit":  []string{unit},
+		"units": []string{units},
+	}, "popular_links")
+	if err != nil {
+		return
+	}
+	return req, err
 }
