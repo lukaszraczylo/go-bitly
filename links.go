@@ -13,6 +13,7 @@ type Links struct {
 // Link represents the data returned from link endpoints.
 type Link struct {
 	Clicks        int    `json:"link_clicks"`
+	ClicksTotal   int    `json:"clicks"`
 	ShortURL      string `json:"short_url"`
 	LongURL       string `json:"long_url"`
 	GlobalHash    string `json:"global_hash"`
@@ -24,6 +25,11 @@ type Link struct {
 	AggregateLink string `json:"aggregate_link"`
 	CreatedAt     int    `json:"created_at"`
 	CreatedBy     string `json:"created_by"`
+	Link          string `json:"link"`
+}
+
+type PopularLinks struct {
+	Link []Link `json:"popular_links"`
 }
 
 // req wraps Client#get and unpacks the response specifically for Links methods.
@@ -38,7 +44,6 @@ func (client *Links) req(path string, params url.Values, key string) (links []Li
 	if err != nil {
 		return
 	}
-
 	return res[key], err
 }
 
@@ -125,13 +130,21 @@ func (client *Links) Clicks(shortURL string, unit string, units string) (link Li
 	return
 }
 
-func (client *Links) Popular(unit string, units string) (links []Link, err error) {
-	req, err := client.req("/user/popular_links", url.Values{
+func (client *Links) Popular(unit string, units string) (links PopularLinks, err error) {
+
+	req, err := client.get("/user/popular_links", url.Values{
 		"unit":  []string{unit},
 		"units": []string{units},
-	}, "popular_links")
+	})
 	if err != nil {
 		return
 	}
-	return req, err
+
+	res := PopularLinks{}
+	err = json.Unmarshal(req.Data, &res)
+	if err != nil {
+		return
+	}
+
+	return res, err
 }
