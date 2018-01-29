@@ -12,6 +12,7 @@ type Links struct {
 
 // Link represents the data returned from link endpoints.
 type Link struct {
+	Clicks        int    `json:"link_clicks"`
 	ShortURL      string `json:"short_url"`
 	LongURL       string `json:"long_url"`
 	GlobalHash    string `json:"global_hash"`
@@ -107,5 +108,18 @@ func (client *Links) Shorten(longURL string) (link Link, err error) {
 
 	err = json.Unmarshal(req.Data, &link)
 
+	return
+}
+
+func (client *Links) Clicks(shortURL string, unit string) (link Link, err error) {
+	req, err := client.get("/link/clicks", url.Values{
+		"link": []string{shortURL},
+		"unit": []string{unit},
+	})
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal(req.Data, &link)
 	return
 }
